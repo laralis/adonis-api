@@ -1,5 +1,6 @@
 import Post from '#models/post'
 import User from '#models/user'
+import { createUserValidator, updateUserValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class UsersController {
@@ -16,7 +17,7 @@ export default class UsersController {
    * Handle form submission for the create action
    */
   async store({ request, response }: HttpContext) {
-    const data = request.only(['password', 'name'])
+    const data = await request.validateUsing(createUserValidator)
     const user = await User.create(data)
     return response.status(201).send(user)
   }
@@ -35,7 +36,7 @@ export default class UsersController {
    */
   async update({ params, request }: HttpContext) {
     const id = params.id
-    const data = request.only(['name', 'password'])
+    const data = await request.validateUsing(updateUserValidator)
     const user = await User.findOrFail(id)
     user.merge(data)
     await user.save()
